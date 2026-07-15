@@ -25,6 +25,7 @@ from models import (
     ProcessStatus,
     RobotStateMsg,
     TeleopCmd,
+    VoltageState,
 )
 from diagnostic import run_diagnostic
 from process_manager import ProcessManager
@@ -98,6 +99,11 @@ async def _state_broadcaster() -> None:
         odom_raw = _ros_bridge.get_state()
         odom = OdometryState(**odom_raw) if odom_raw else None
 
+        voltage = {
+            label: VoltageState(**reading)
+            for label, reading in _ros_bridge.get_voltage().items()
+        }
+
         statuses = _process_manager.all_statuses()
         mission_active = all(
             statuses[name].running for name in _MISSION_CORE_PROCESSES
@@ -112,6 +118,7 @@ async def _state_broadcaster() -> None:
         msg = RobotStateMsg(
             timestamp=time.time(),
             odometry=odom,
+            voltage=voltage,
             mission_active=mission_active,
             mission_paused=_mission_paused,
             process_statuses=statuses,

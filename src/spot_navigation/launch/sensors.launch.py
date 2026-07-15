@@ -18,6 +18,8 @@ def generate_launch_description():
     radio_baud = LaunchConfiguration('radio_baud')
     owon_mac = LaunchConfiguration('owon_mac_address')
     owon_model = LaunchConfiguration('owon_model')
+    owon_mac_2 = LaunchConfiguration('owon_mac_address_2')
+    owon_model_2 = LaunchConfiguration('owon_model_2')
 
     # Include the selected Velodyne launch file.
     vlp32c_launch = IncludeLaunchDescription(
@@ -115,6 +117,29 @@ def generate_launch_description():
         }]
     )
 
+    # Second multimeter (e.g. the other leg). Topic name in owon_node.cpp is
+    # hardcoded to 'owon/value' / 'owon/voltage_marker', so this instance is
+    # remapped to '_2' variants to avoid colliding with the first on the wire.
+    # owon_mac_address_2 is a placeholder — set it to the real BLE MAC address
+    # before running this node; until then it will just fail to connect and
+    # the web UI's second voltage reading will show as "—".
+    owon_node_2 = Node(
+        package='owon_driver',
+        executable='owon_node',
+        name='owon_driver_node_2',
+        output='screen',
+        parameters=[{
+            'mac_address': owon_mac_2,
+            'model': owon_model_2,
+            'odom_topic': '/odometry_map',
+            'target_frame': 'map',
+        }],
+        remappings=[
+            ('owon/value', 'owon/value_2'),
+            ('owon/voltage_marker', 'owon/voltage_marker_2'),
+        ]
+    )
+
     radio_bridge_node = Node(
         package='spot_navigation',
         executable='radio_bridge',
@@ -165,6 +190,16 @@ def generate_launch_description():
             default_value='cm2100b',
             description='OWON multimeter model identifier.'
         ),
+        DeclareLaunchArgument(
+            'owon_mac_address_2',
+            default_value='00:00:00:00:00:00',
+            description='Bluetooth MAC address for the second OWON multimeter (placeholder — replace with the real address).'
+        ),
+        DeclareLaunchArgument(
+            'owon_model_2',
+            default_value='cm2100b',
+            description='Second OWON multimeter model identifier.'
+        ),
         static_transform_base_to_mount,
         static_transform_velodyne,
         static_transform_imu,
@@ -172,5 +207,6 @@ def generate_launch_description():
         vlp16_launch,
         imu_node,
         owon_node,
+        owon_node_2,
         radio_bridge_node,
     ])
