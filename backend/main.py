@@ -99,10 +99,8 @@ async def _state_broadcaster() -> None:
         odom_raw = _ros_bridge.get_state()
         odom = OdometryState(**odom_raw) if odom_raw else None
 
-        voltage = {
-            label: VoltageState(**reading)
-            for label, reading in _ros_bridge.get_voltage().items()
-        }
+        voltage_raw = _ros_bridge.get_voltage()
+        voltage = VoltageState(**voltage_raw) if voltage_raw else None
 
         statuses = _process_manager.all_statuses()
         mission_active = all(

@@ -64,7 +64,7 @@ class VoltageState(BaseModel):
 class RobotStateMsg(BaseModel):
     timestamp: float
     odometry: OdometryState | None = None
-    voltage: dict[str, VoltageState] = {}
+    voltage: VoltageState | None = None
     mission_active: bool = False
     mission_paused: bool = False
     process_statuses: dict[str, ProcessStatus] = {}

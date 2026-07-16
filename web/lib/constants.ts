@@ -19,13 +19,6 @@ export const POINT_COLOR = "#00ff88";
 export const VOLTAGE_WARN_THRESHOLD = 45.0;
 export const VOLTAGE_CRITICAL_THRESHOLD = 42.0;
 
-// Maps backend VOLTAGE_SOURCES labels (ros_bridge.py) to display names.
-// Rename once real hardware placement/labeling (e.g. left/right leg) is decided.
-export const VOLTAGE_LABELS: Record<string, string> = {
-  leg_1: "Leg 1",
-  leg_2: "Leg 2",
-};
-
 export const PROCESS_LABELS: Record<string, string> = {
   lidar_stream: "LiDAR stream",
   sensors: "Sensors",

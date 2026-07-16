@@ -23,15 +23,6 @@ except ImportError:
 # so the UI doesn't keep showing a frozen last-known voltage as if it were live.
 VOLTAGE_STALE_AFTER_SEC = 5.0
 
-# (topic, label) pairs to subscribe to. One entry per owon_node instance.
-# "leg_2" only exists once a second owon_node is added to sensors.launch.py
-# with its topic remapped so it doesn't collide with the first on owon/value —
-# rename these labels freely, they're just dict keys used by the UI.
-VOLTAGE_SOURCES: list[tuple[str, str]] = [
-    ("owon/value", "leg_1"),
-    ("owon/value_2", "leg_2"),
-]
-
 
 def _yaw_from_quaternion(q: Any) -> float:
     """Extract yaw (rotation about Z) from a ROS quaternion."""
@@ -52,7 +43,7 @@ class RosBridge:
         self._goal_pub = None
         self._lock = threading.Lock()
         self._latest_odom: dict | None = None
-        self._latest_voltage: dict[str, dict] = {}
+        self._latest_voltage: dict | None = None
         self._spin_thread: threading.Thread | None = None
         self.available = _ROS_AVAILABLE
 
@@ -72,12 +63,7 @@ class RosBridge:
         self._cmd_vel_pub = node.create_publisher(Twist, "/cmd_vel", 10)
         self._goal_pub = node.create_publisher(PoseStamped, "/goal_pose", 10)
         node.create_subscription(Odometry, "/odometry_map", self._odom_cb, 10)
-        for topic, label in VOLTAGE_SOURCES:
-            node.create_subscription(
-                Float32, topic,
-                lambda msg, label=label: self._voltage_cb(msg, label),
-                10,
-            )
+        node.create_subscription(Float32, "owon/value", self._voltage_cb, 10)
 
         self._spin_thread = threading.Thread(
             target=rclpy.spin,
@@ -127,24 +113,24 @@ class RosBridge:
         with self._lock:
             return dict(self._latest_odom) if self._latest_odom else None
 
-    def get_voltage(self) -> dict[str, dict]:
+    def get_voltage(self) -> dict | None:
         with self._lock:
-            readings = {label: dict(r) for label, r in self._latest_voltage.items()}
-        now = time.time()
-        for r in readings.values():
-            r["stale"] = (now - r["timestamp"]) > VOLTAGE_STALE_AFTER_SEC
-        return readings
+            reading = dict(self._latest_voltage) if self._latest_voltage else None
+        if reading is None:
+            return None
+        reading["stale"] = (time.time() - reading["timestamp"]) > VOLTAGE_STALE_AFTER_SEC
+        return reading
 
-    def _voltage_cb(self, msg: Any, label: str) -> None:
+    def _voltage_cb(self, msg: Any) -> None:
         with self._lock:
-            self._latest_voltage[label] = {
+            self._latest_voltage = {
                 "value": msg.data,
                 "unit": "V",
                 "timestamp": time.time(),
             }
 
     def _start_mock_voltage(self) -> None:
-        """Dev-only stand-in for the owon/value topics when rclpy/hardware isn't
+        """Dev-only stand-in for the owon/value topic when rclpy/hardware isn't
         present (e.g. developing on a laptop instead of the robot's onboard
         compute). Enabled via MOCK_VOLTAGE=1; never runs when ROS is available."""
         import random
@@ -152,12 +138,11 @@ class RosBridge:
         def _loop() -> None:
             while True:
                 with self._lock:
-                    for _, label in VOLTAGE_SOURCES:
-                        self._latest_voltage[label] = {
-                            "value": round(random.uniform(40.0, 48.0), 2),
-                            "unit": "V",
-                            "timestamp": time.time(),
-                        }
+                    self._latest_voltage = {
+                        "value": round(random.uniform(40.0, 48.0), 2),
+                        "unit": "V",
+                        "timestamp": time.time(),
+                    }
                 time.sleep(1.0)
 
         threading.Thread(target=_loop, daemon=True).start()

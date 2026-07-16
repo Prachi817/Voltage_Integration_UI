@@ -1,11 +1,7 @@
 "use client";
 
 import { useRobotState } from "@/hooks/useRobotState";
-import {
-  VOLTAGE_WARN_THRESHOLD,
-  VOLTAGE_CRITICAL_THRESHOLD,
-  VOLTAGE_LABELS,
-} from "@/lib/constants";
+import { VOLTAGE_WARN_THRESHOLD, VOLTAGE_CRITICAL_THRESHOLD } from "@/lib/constants";
 
 function voltageColor(value: number): string {
   if (value <= VOLTAGE_CRITICAL_THRESHOLD) return "#ff4444";
@@ -15,7 +11,10 @@ function voltageColor(value: number): string {
 
 export function VoltageBadge() {
   const { state } = useRobotState();
-  const readings = Object.entries(state?.voltage ?? {});
+  const voltage = state?.voltage;
+
+  const dotColor = voltage && !voltage.stale ? voltageColor(voltage.value) : "#444";
+  const label = voltage ? `${voltage.value.toFixed(2)} ${voltage.unit}` : "—";
 
   return (
     <div
@@ -25,43 +24,30 @@ export function VoltageBadge() {
         left: 16,
         zIndex: 10,
         display: "flex",
-        flexDirection: "column",
-        gap: 4,
+        alignItems: "center",
+        gap: 8,
         background: "rgba(0,0,0,0.55)",
-        padding: "8px 12px",
+        padding: "6px 12px",
         borderRadius: 6,
         color: "#fff",
         fontFamily: "monospace",
         fontSize: 13,
       }}
     >
-      {readings.length === 0 ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#444" }} />
-          <span style={{ color: "#999" }}>Voltage</span>
-          <span>—</span>
-        </div>
-      ) : (
-        readings.map(([label, reading]) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: reading.stale ? "#444" : voltageColor(reading.value),
-                display: "inline-block",
-                flexShrink: 0,
-              }}
-            />
-            <span style={{ color: "#999" }}>{VOLTAGE_LABELS[label] ?? label}</span>
-            <span>
-              {reading.value.toFixed(2)} {reading.unit}
-              {reading.stale ? " (stale)" : ""}
-            </span>
-          </div>
-        ))
-      )}
+      <span
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: dotColor,
+          display: "inline-block",
+        }}
+      />
+      <span style={{ color: "#999" }}>Voltage</span>
+      <span>
+        {label}
+        {voltage?.stale ? " (stale)" : ""}
+      </span>
     </div>
   );
 }

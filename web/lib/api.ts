@@ -35,7 +35,7 @@ export interface VoltageState {
 export interface RobotState {
   timestamp: number;
   odometry: OdometryState | null;
-  voltage: Record<string, VoltageState>;
+  voltage: VoltageState | null;
   mission_active: boolean;
   mission_paused: boolean;
   process_statuses: Record<string, ProcessStatus>;
