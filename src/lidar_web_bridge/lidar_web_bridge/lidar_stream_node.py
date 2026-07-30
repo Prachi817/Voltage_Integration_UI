@@ -13,7 +13,9 @@ from websockets.exceptions import ConnectionClosed
 from .point_cloud_utils import (
     downsample_stride,
     pack_xyz_binary,
+    pack_xyzi_binary,
     parse_pointcloud2_xyz,
+    parse_pointcloud2_xyzi,
     transform_nwu_to_threejs,
 )
 
@@ -27,12 +29,14 @@ class LidarStreamNode(Node):
         self.declare_parameter("target_points", 4000)
         self.declare_parameter("input_topic", "/velodyne_points")
         self.declare_parameter("publish_rate_hz", 10.0)
+        self.declare_parameter("include_intensity", False)
 
         self._ws_host = self.get_parameter("ws_host").get_parameter_value().string_value
         self._ws_port = self.get_parameter("ws_port").get_parameter_value().integer_value
         self._target_points = self.get_parameter("target_points").get_parameter_value().integer_value
         self._input_topic = self.get_parameter("input_topic").get_parameter_value().string_value
         self._publish_rate_hz = self.get_parameter("publish_rate_hz").get_parameter_value().double_value
+        self._include_intensity = self.get_parameter("include_intensity").get_parameter_value().bool_value
 
         self._ws_clients: set = set()
         self._ws_clients_lock = threading.Lock()
@@ -46,8 +50,9 @@ class LidarStreamNode(Node):
         self._ws_thread = threading.Thread(target=self._run_ws_server, daemon=True)
         self._ws_thread.start()
 
+        mode = "XYZI (classified)" if self._include_intensity else "XYZ"
         self.get_logger().info(
-            f"LidarStreamNode started — subscribing to {self._input_topic}, "
+            f"LidarStreamNode started — subscribing to {self._input_topic} ({mode}), "
             f"WebSocket on ws://{self._ws_host}:{self._ws_port}"
         )
 
@@ -58,21 +63,28 @@ class LidarStreamNode(Node):
         self._last_publish_time = now
 
         try:
-            xyz = parse_pointcloud2_xyz(msg)
+            if self._include_intensity:
+                points = parse_pointcloud2_xyzi(msg)
+            else:
+                points = parse_pointcloud2_xyz(msg)
         except Exception as exc:
             self.get_logger().warn(f"Failed to parse PointCloud2 message: {exc}")
             return
 
-        if len(xyz) == 0:
+        if len(points) == 0:
             return
 
-        keep_every = max(1, len(xyz) // self._target_points)
-        xyz = downsample_stride(xyz, keep_every)
-        xyz = transform_nwu_to_threejs(xyz)
-        payload = pack_xyz_binary(xyz)
+        keep_every = max(1, len(points) // self._target_points)
+        points = downsample_stride(points, keep_every)
+        points = transform_nwu_to_threejs(points)
 
-        n_points = len(xyz)
-        header = b"PC\x00\x00" + struct.pack("<I", n_points)
+        n_points = len(points)
+        if self._include_intensity:
+            payload = pack_xyzi_binary(points)
+            header = b"CI\x00\x00" + struct.pack("<I", n_points)
+        else:
+            payload = pack_xyz_binary(points)
+            header = b"PC\x00\x00" + struct.pack("<I", n_points)
         full_msg = header + payload
 
         asyncio.run_coroutine_threadsafe(self._broadcast(full_msg), self._loop)

@@ -1,13 +1,7 @@
 "use client";
 
 import { useRobotState } from "@/hooks/useRobotState";
-import { VOLTAGE_WARN_THRESHOLD, VOLTAGE_CRITICAL_THRESHOLD } from "@/lib/constants";
-
-function voltageColor(value: number): string {
-  if (value <= VOLTAGE_CRITICAL_THRESHOLD) return "#ff4444";
-  if (value <= VOLTAGE_WARN_THRESHOLD) return "#f5a623";
-  return "#00ff88";
-}
+import { voltageColor } from "@/lib/voltageColor";
 
 export function VoltageBadge() {
   const { state } = useRobotState();
