@@ -29,7 +29,7 @@ function ViewTabs({ active, onChange }: { active: ViewTab; onChange: (tab: ViewT
         LiDAR
       </button>
       <button style={tabStyle("heatmap")} onClick={() => onChange("heatmap")}>
-        Heatmap
+        Voltage Map
       </button>
     </div>
   );
