@@ -164,12 +164,18 @@ class RosBridge:
             t0 = time.time()
             while True:
                 angle = angular_speed * (time.time() - t0)
+                # angle grows unbounded with elapsed time; wrap it into
+                # (-pi, pi] the same way _yaw_from_quaternion's atan2 does
+                # for real odometry, so a long-running mock session doesn't
+                # drift into thousands of degrees.
+                raw_yaw = angle + math.pi / 2.0
+                yaw = math.atan2(math.sin(raw_yaw), math.cos(raw_yaw))
                 with self._lock:
                     self._latest_odom = {
                         "x": radius * math.cos(angle),
                         "y": radius * math.sin(angle),
                         "z": 0.0,
-                        "yaw": angle + math.pi / 2.0,
+                        "yaw": yaw,
                     }
                 time.sleep(0.2)
 
