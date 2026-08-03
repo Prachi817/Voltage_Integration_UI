@@ -52,6 +52,8 @@ class RosBridge:
             print("[ros_bridge] rclpy not available — ROS bridge disabled")
             if os.environ.get("MOCK_VOLTAGE") == "1":
                 self._start_mock_voltage()
+            if os.environ.get("MOCK_ODOMETRY") == "1":
+                self._start_mock_odometry()
             return
 
         os.environ.setdefault("RMW_IMPLEMENTATION", "rmw_zenoh_cpp")
@@ -147,6 +149,32 @@ class RosBridge:
 
         threading.Thread(target=_loop, daemon=True).start()
         print("[ros_bridge] MOCK_VOLTAGE=1 — publishing synthetic voltage readings for local UI testing")
+
+    def _start_mock_odometry(self) -> None:
+        """Dev-only stand-in for the /odometry_map subscription when rclpy/
+        hardware isn't present. Drives a slow circle so the web UI's path
+        trail and moving voltage marker have something to render locally.
+        Enabled via MOCK_ODOMETRY=1; never runs when ROS is available — same
+        guard as _start_mock_voltage, since this whole method is only ever
+        reachable from the `if not _ROS_AVAILABLE` branch in start()."""
+        radius = 3.0
+        angular_speed = 0.05  # rad/s -> one full lap roughly every 2 minutes
+
+        def _loop() -> None:
+            t0 = time.time()
+            while True:
+                angle = angular_speed * (time.time() - t0)
+                with self._lock:
+                    self._latest_odom = {
+                        "x": radius * math.cos(angle),
+                        "y": radius * math.sin(angle),
+                        "z": 0.0,
+                        "yaw": angle + math.pi / 2.0,
+                    }
+                time.sleep(0.2)
+
+        threading.Thread(target=_loop, daemon=True).start()
+        print("[ros_bridge] MOCK_ODOMETRY=1 — publishing a synthetic circular path for local UI testing")
 
     def _odom_cb(self, msg: Any) -> None:
         pos = msg.pose.pose.position

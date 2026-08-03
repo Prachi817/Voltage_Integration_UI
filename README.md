@@ -194,3 +194,17 @@ ros2 bag record -a --max-bag-size 1073741824
   `MOCK_VOLTAGE=1` when starting the backend to generate a synthetic voltage
   reading in place of the real `owon/value` subscription. It only activates
   when rclpy isn't available, so it's a no-op on the robot host.
+- Similarly, `MOCK_ODOMETRY=1` generates a synthetic circular path in place
+  of the real `/odometry_map` subscription, so the Voltage Map tab's path
+  trail and moving voltage marker have something to render locally. Same
+  guard as `MOCK_VOLTAGE` — only activates when rclpy isn't available, so
+  it's also a no-op on the robot host regardless of whether it's set.
+- `mock_terrain_cloud_publisher.py` (repo root) is a standalone, ROS-free
+  script that serves a fake classified point cloud on `ws://localhost:8766`,
+  matching the wire format `terrain_heatmap_stream.launch.py` normally
+  produces — for exercising the Voltage Map tab's point cloud without ROS 2
+  or the real robot. Run with `python3 mock_terrain_cloud_publisher.py`
+  (needs the `websockets` package). It's a separate script that's never
+  launched by anything else, so it can't collide with the real bridge
+  unless you deliberately run it on the same machine/port as one — don't
+  run it on the robot's NUC.
