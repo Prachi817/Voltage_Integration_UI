@@ -1,29 +1,37 @@
 "use client";
 
-import { Html } from "@react-three/drei";
+import { Html, Line } from "@react-three/drei";
 import { RobotState } from "@/lib/api";
 import { voltageColor } from "@/lib/voltageColor";
 import { rosToThreeJS } from "@/lib/coords";
 
-// Matches owon_node.cpp's marker_z default, so the label floats at roughly
-// the same height as the equivalent RViz marker.
-const MARKER_HEIGHT_OFFSET = 1.2;
+// Smaller than owon_node.cpp's marker_z (1.2) — this scene has no ground
+// grid for scale reference, so a tall offset reads as "detached from the
+// path" rather than "floating just above it." The indicator line below is
+// what actually keeps the label visually anchored, same idea as
+// owon_value_marker_node.cpp's enable_indicator_line.
+const MARKER_HEIGHT_OFFSET = 0.5;
+const INDICATOR_LINE_COLOR = "#00ffff"; // matches that node's default indicator_line color
 
 // The live voltage badge, but riding at the robot's current 3D position
 // instead of pinned to a corner of the screen — conceptually the same thing
-// owon_node.cpp does with its base_link-anchored RViz marker, implemented
-// in our own scene using live odometry + voltage from /ws/state.
+// owon_node.cpp / owon_value_marker_node.cpp do with a base_link-anchored
+// RViz marker (+ connecting indicator line), implemented in our own scene
+// using live odometry + voltage from /ws/state.
 export function VoltageMarker3D({ state }: { state: RobotState | null }) {
   const odom = state?.odometry;
   if (!odom) return null;
 
+  const groundPos = rosToThreeJS(odom.x, odom.y, odom.z);
   const pos = rosToThreeJS(odom.x, odom.y, odom.z + MARKER_HEIGHT_OFFSET);
   const voltage = state?.voltage;
   const dotColor = voltage && !voltage.stale ? voltageColor(voltage.value) : "#444";
   const label = voltage ? `${voltage.value.toFixed(2)} ${voltage.unit}` : "—";
 
   return (
-    <Html position={pos} center distanceFactor={8}>
+    <>
+      <Line points={[groundPos, pos]} color={INDICATOR_LINE_COLOR} lineWidth={1.5} />
+      <Html position={pos} center distanceFactor={8}>
       <div
         style={{
           display: "flex",
@@ -50,6 +58,7 @@ export function VoltageMarker3D({ state }: { state: RobotState | null }) {
         {label}
         {voltage?.stale ? " (stale)" : ""}
       </div>
-    </Html>
+      </Html>
+    </>
   );
 }

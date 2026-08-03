@@ -33,11 +33,14 @@ import websockets
 
 WS_HOST = "0.0.0.0"
 WS_PORT = 8766
-N_GROUND_POINTS = 1200
-N_OBSTACLE_POINTS = 150
-GRID_HALF_EXTENT = 5.0
-OBSTACLE_CENTER = (2.0, 1.5)
-OBSTACLE_RADIUS = 0.8
+# A wider, denser ground plane so it reads as a filled rectangle rather than
+# a sparse scattered patch — the earlier 5m half-extent / 1200 points looked
+# like a small random polygon on screen.
+N_GROUND_POINTS = 6000
+N_OBSTACLE_POINTS = 400
+GRID_HALF_EXTENT = 15.0
+OBSTACLE_CLUSTERS = [(6.0, 4.5), (-5.0, -6.0), (3.0, -8.0)]
+OBSTACLE_RADIUS = 1.2
 TICK_SECONDS = 0.5
 
 MAGIC = b"CI\x00\x00"
@@ -54,15 +57,18 @@ def _generate_frame() -> bytes:
         z = random.uniform(-0.02, 0.02)
         points.append((x, y, z, 0.0))
 
-    # One obstacle cluster: intensity 1.0 — matches terrain_processor.cpp's
-    # obstacle classification, so the heatmap has something red to show.
-    for _ in range(N_OBSTACLE_POINTS):
-        angle = random.uniform(0, 2 * math.pi)
-        radius = random.uniform(0, OBSTACLE_RADIUS)
-        height = random.uniform(0.0, 1.2)
-        x = OBSTACLE_CENTER[0] + radius * math.cos(angle)
-        y = OBSTACLE_CENTER[1] + radius * math.sin(angle)
-        points.append((x, y, height, 1.0))
+    # A few obstacle clusters spread across the grid: intensity 1.0 —
+    # matches terrain_processor.cpp's obstacle classification, so the
+    # heatmap has multiple red patches to show, not just one.
+    points_per_cluster = N_OBSTACLE_POINTS // len(OBSTACLE_CLUSTERS)
+    for cluster_x, cluster_y in OBSTACLE_CLUSTERS:
+        for _ in range(points_per_cluster):
+            angle = random.uniform(0, 2 * math.pi)
+            radius = random.uniform(0, OBSTACLE_RADIUS)
+            height = random.uniform(0.0, 1.2)
+            x = cluster_x + radius * math.cos(angle)
+            y = cluster_y + radius * math.sin(angle)
+            points.append((x, y, height, 1.0))
 
     payload = b"".join(struct.pack("<ffff", *p) for p in points)
     header = MAGIC + struct.pack("<I", len(points))

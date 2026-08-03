@@ -55,7 +55,11 @@ export function HeatmapViewer() {
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a" }}>
       <ConnectionBadge connected={connected} />
-      <Canvas camera={{ position: [0, 5, 10], fov: 60 }}>
+      {/* Pulled back further than LidarViewer's default — this tab's classified
+          cloud covers a much wider area (see mock_terrain_cloud_publisher.py's
+          GRID_HALF_EXTENT), so the same close-in framing left most of it
+          off-screen until the user manually zoomed out. */}
+      <Canvas camera={{ position: [0, 25, 40], fov: 60 }}>
         <ambientLight intensity={0.5} />
         <OrbitControls makeDefault />
         {positions && positions.length > 0 && (
