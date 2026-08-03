@@ -38,18 +38,18 @@ export function VoltageMarker3D({ state }: { state: RobotState | null }) {
           alignItems: "center",
           gap: 6,
           background: "rgba(0,0,0,0.55)",
-          padding: "4px 8px",
+          padding: "6px 12px",
           borderRadius: 6,
           color: "#fff",
           fontFamily: "monospace",
-          fontSize: 12,
+          fontSize: 18,
           whiteSpace: "nowrap",
         }}
       >
         <span
           style={{
-            width: 8,
-            height: 8,
+            width: 11,
+            height: 11,
             borderRadius: "50%",
             background: dotColor,
             display: "inline-block",
