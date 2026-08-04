@@ -25,6 +25,10 @@ _ALLOWLIST_BASE: dict[str, list[str]] = {
     "lidar_stream": [
         "ros2", "launch", "spot_navigation", "lidar_stream.launch.py",
     ],
+    # Voltage integration: terrain heatmap stream for the Voltage Map tab.
+    "terrain_heatmap": [
+        "ros2", "launch", "spot_navigation", "terrain_heatmap_stream.launch.py",
+    ],
     "sensors": [
         "ros2", "launch", "spot_navigation", "sensors.launch.py",
         "radio_baud:=57600",

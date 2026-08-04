@@ -28,6 +28,8 @@ export const VOLTAGE_CRITICAL_THRESHOLD = 42.0;
 
 export const PROCESS_LABELS: Record<string, string> = {
   lidar_stream: "LiDAR stream",
+  // Voltage integration: terrain heatmap stream for the Voltage Map tab.
+  terrain_heatmap: "Terrain heatmap",
   sensors: "Sensors",
   localization: "Localization",
   navigation: "Navigation",
