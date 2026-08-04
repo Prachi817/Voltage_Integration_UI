@@ -52,6 +52,7 @@ class RosBridge:
             print("[ros_bridge] rclpy not available — ROS bridge disabled")
             if os.environ.get("MOCK_VOLTAGE") == "1":
                 self._start_mock_voltage()
+            # Voltage integration: mock odometry for local Voltage Map testing.
             if os.environ.get("MOCK_ODOMETRY") == "1":
                 self._start_mock_odometry()
             return
@@ -150,6 +151,7 @@ class RosBridge:
         threading.Thread(target=_loop, daemon=True).start()
         print("[ros_bridge] MOCK_VOLTAGE=1 — publishing synthetic voltage readings for local UI testing")
 
+    # Voltage integration: local Voltage Map testing without ROS/hardware.
     def _start_mock_odometry(self) -> None:
         """Dev-only stand-in for the /odometry_map subscription when rclpy/
         hardware isn't present. Drives a slow circle so the web UI's path

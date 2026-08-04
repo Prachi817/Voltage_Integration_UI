@@ -1,5 +1,6 @@
 "use client";
 
+// Voltage integration: moving voltage label for the Voltage Map tab.
 import { Html, Line } from "@react-three/drei";
 import { RobotState } from "@/lib/api";
 import { voltageColor } from "@/lib/voltageColor";

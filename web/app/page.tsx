@@ -2,6 +2,7 @@
 
 import { useState, CSSProperties } from "react";
 import { LidarViewer } from "@/components/LidarViewer";
+// Voltage integration: Voltage Map tab.
 import { HeatmapViewer } from "@/components/HeatmapViewer";
 import { StatusPanel } from "@/components/StatusPanel";
 import { ControlPanel } from "@/components/ControlPanel";
@@ -11,6 +12,7 @@ import { VoltageBadge } from "@/components/VoltageBadge";
 
 type ViewTab = "lidar" | "heatmap";
 
+// Voltage integration: LiDAR / Voltage Map tab switcher.
 function ViewTabs({ active, onChange }: { active: ViewTab; onChange: (tab: ViewTab) => void }) {
   const tabStyle = (tab: ViewTab): CSSProperties => ({
     padding: "6px 14px",

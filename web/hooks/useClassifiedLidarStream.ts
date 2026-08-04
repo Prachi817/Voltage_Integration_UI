@@ -1,5 +1,6 @@
 "use client";
 
+// Voltage integration: classified point cloud stream for the Voltage Map tab.
 import { useEffect, useRef, useState } from "react";
 import { parseClassifiedFrame } from "@/lib/parseClassifiedCloud";
 

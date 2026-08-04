@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+Voltage integration: local mock for the Voltage Map tab's classified point cloud.
+
 Standalone, ROS-free stand-in for the terrain heatmap WebSocket stream that
 terrain_heatmap_stream.launch.py normally serves (a second lidar_web_bridge
 instance subscribed to terrain_analysis's terrain_cloud topic).

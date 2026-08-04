@@ -36,6 +36,7 @@ def parse_pointcloud2_xyz(msg) -> np.ndarray:
     return xyz[valid]
 
 
+# Voltage integration: terrain heatmap stream for the Voltage Map tab.
 def parse_pointcloud2_xyzi(msg) -> np.ndarray:
     """Extract (N, 4) float32 XYZI array from a sensor_msgs/PointCloud2.
 
@@ -94,6 +95,7 @@ def transform_nwu_to_threejs(xyz: np.ndarray) -> np.ndarray:
 
     Operates on the first 3 columns only, so it works unchanged whether xyz
     has 3 columns (XYZ) or more (e.g. XYZI) — extra columns pass through.
+    (Voltage integration: widened for the Voltage Map tab's XYZI stream.)
     """
     out = xyz.copy()
     out[:, 0] = -xyz[:, 1]
@@ -107,6 +109,7 @@ def pack_xyz_binary(xyz: np.ndarray) -> bytes:
     return xyz.astype(np.float32, copy=False).tobytes()
 
 
+# Voltage integration: terrain heatmap stream for the Voltage Map tab.
 def pack_xyzi_binary(xyzi: np.ndarray) -> bytes:
     """Flatten (N, 4) float32 to raw bytes for the WebSocket wire format."""
     return xyzi.astype(np.float32, copy=False).tobytes()

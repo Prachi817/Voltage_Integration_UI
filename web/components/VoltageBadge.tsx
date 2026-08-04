@@ -1,6 +1,7 @@
 "use client";
 
 import { useRobotState } from "@/hooks/useRobotState";
+// Voltage integration: voltageColor now shared with VoltageMarker3D and usePathTrail.
 import { voltageColor } from "@/lib/voltageColor";
 
 export function VoltageBadge() {

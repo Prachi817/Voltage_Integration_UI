@@ -1,5 +1,6 @@
 "use client";
 
+// Voltage integration: accumulates the voltage-colored path trail for the Voltage Map tab.
 import { useEffect, useRef, useState } from "react";
 import { RobotState } from "@/lib/api";
 import { rosToThreeJS } from "@/lib/coords";

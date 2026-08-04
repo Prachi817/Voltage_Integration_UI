@@ -29,6 +29,7 @@ class LidarStreamNode(Node):
         self.declare_parameter("target_points", 4000)
         self.declare_parameter("input_topic", "/velodyne_points")
         self.declare_parameter("publish_rate_hz", 10.0)
+        # Voltage integration: enables the terrain heatmap stream for the Voltage Map tab.
         self.declare_parameter("include_intensity", False)
 
         self._ws_host = self.get_parameter("ws_host").get_parameter_value().string_value
@@ -63,6 +64,7 @@ class LidarStreamNode(Node):
         self._last_publish_time = now
 
         try:
+            # Voltage integration: XYZI branch feeds the Voltage Map tab's terrain heatmap.
             if self._include_intensity:
                 points = parse_pointcloud2_xyzi(msg)
             else:
@@ -79,6 +81,7 @@ class LidarStreamNode(Node):
         points = transform_nwu_to_threejs(points)
 
         n_points = len(points)
+        # Voltage integration: "CI" wire format carries intensity for the Voltage Map tab.
         if self._include_intensity:
             payload = pack_xyzi_binary(points)
             header = b"CI\x00\x00" + struct.pack("<I", n_points)

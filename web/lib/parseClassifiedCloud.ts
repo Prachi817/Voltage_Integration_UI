@@ -1,3 +1,4 @@
+// Voltage integration: terrain heatmap stream for the Voltage Map tab.
 // Parses the "CI" (classified-intensity) binary frame format produced by
 // lidar_stream_node.py when include_intensity:=true — used for the
 // terrain_analysis heatmap stream, as opposed to parsePointCloud.ts's plain

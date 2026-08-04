@@ -5,6 +5,7 @@ const _host =
 export const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? `ws://${_host}:8765`;
 
+// Voltage integration: Voltage Map tab's terrain heatmap stream.
 // terrain_heatmap_stream.launch.py runs a second lidar_web_bridge instance
 // on this port, streaming terrain_analysis's classified cloud instead of
 // the raw Velodyne feed WS_URL points at.

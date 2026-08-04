@@ -1,5 +1,7 @@
 "use client";
 
+// Voltage integration: the Voltage Map tab's scene — classified point cloud,
+// voltage-colored path trail, and the moving voltage marker, together.
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useClassifiedLidarStream } from "@/hooks/useClassifiedLidarStream";

@@ -1,5 +1,6 @@
 "use client";
 
+// Voltage integration: renders the voltage-colored path trail on the Voltage Map tab.
 import { Line } from "@react-three/drei";
 
 interface PathTrailProps {

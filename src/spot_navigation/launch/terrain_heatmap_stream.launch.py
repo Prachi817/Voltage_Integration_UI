@@ -4,6 +4,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+# Voltage integration: launches the terrain heatmap stream for the Voltage Map tab.
 # Second lidar_web_bridge instance, pointed at terrain_analysis's classified
 # cloud (ground/obstacle intensity) instead of the raw Velodyne feed used by
 # lidar_stream.launch.py. Runs on its own port so the existing raw LiDAR

@@ -1,3 +1,4 @@
+// Voltage integration: shared threshold helper for VoltageBadge, VoltageMarker3D, and usePathTrail.
 import { VOLTAGE_WARN_THRESHOLD, VOLTAGE_CRITICAL_THRESHOLD } from "@/lib/constants";
 
 export function voltageColor(value: number): string {

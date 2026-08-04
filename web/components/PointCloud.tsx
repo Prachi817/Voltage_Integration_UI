@@ -7,6 +7,7 @@ import { POINT_COLOR, POINT_SIZE } from "@/lib/constants";
 interface PointCloudProps {
   positions: Float32Array;
   pointCount: number;
+  // Voltage integration: optional per-point colors for the Voltage Map tab's terrain heatmap.
   colors?: Float32Array | null;
   pointSize?: number;
   color?: string;

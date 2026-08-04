@@ -1,3 +1,4 @@
+// Voltage integration: coordinate helper for the Voltage Map tab (path trail + moving marker).
 // Mirrors point_cloud_utils.py's transform_nwu_to_threejs, applied client-side
 // since odometry (unlike the point cloud) isn't pre-transformed by the backend.
 //
