@@ -5,6 +5,13 @@ const _host =
 export const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? `ws://${_host}:8765`;
 
+// Voltage integration: Voltage Map tab's terrain heatmap stream.
+// terrain_heatmap_stream.launch.py runs a second lidar_web_bridge instance
+// on this port, streaming terrain_analysis's classified cloud instead of
+// the raw Velodyne feed WS_URL points at.
+export const HEATMAP_WS_URL =
+  process.env.NEXT_PUBLIC_HEATMAP_WS_URL ?? `ws://${_host}:8766`;
+
 export const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? `http://${_host}:8000`;
 
@@ -22,6 +29,8 @@ export const VOLTAGE_CRITICAL_THRESHOLD = 42.0;
 export const PROCESS_LABELS: Record<string, string> = {
   lidar_stream: "LiDAR stream",
   spot_driver: "Spot Driver",
+  // Voltage integration: terrain heatmap stream for the Voltage Map tab.
+  terrain_heatmap: "Terrain heatmap",
   sensors: "Sensors",
   localization: "Localization",
   navigation: "Navigation",
